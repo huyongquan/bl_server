@@ -29,6 +29,7 @@ class ChatRequest(BaseModel):
     prompt: str
     model: str = ""
     system: str = ""
+    thinking: bool = False
 
 
 @app.get("/health")
@@ -47,7 +48,7 @@ async def chat(req: ChatRequest) -> str:
     if not req.prompt.strip():
         raise HTTPException(400, "prompt 不能为空")
     try:
-        return await llm.chat(req.prompt, model=req.model, system=req.system)
+        return await llm.chat(req.prompt, model=req.model, system=req.system, thinking=req.thinking)
     except anthropic.AnthropicError as e:
         logger.error(f"[chat] LLM 调用失败: {e}")
         raise HTTPException(502, f"LLM 调用失败: {e}")

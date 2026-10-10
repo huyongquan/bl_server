@@ -20,19 +20,23 @@ def get_client() -> anthropic.AsyncAnthropic:
     return _client
 
 
-async def chat(prompt: str, model: str = "", system: str = "") -> str:
+async def chat(prompt: str, model: str = "", system: str = "", thinking: bool = False) -> str:
     """调用 Anthropic 兼容接口,返回模型的文本回答。
 
     参考 knowledge-base-service 中 _free_chat 的调用方式。
+    thinking=True 时开启模型深度思考,回答仍是最终文本(不含思考过程)。
     """
     client = get_client()
     model_name = model or config.DEFAULT_MODEL
 
-    logger.info(f"[llm] model={model_name} prompt_len={len(prompt)}")
+    logger.info(f"[llm] model={model_name} prompt_len={len(prompt)} thinking={thinking}")
+    # 注意:该网关不支持 thinking=disabled(报 400),所以 False 时不传该参数
+    thinking_param = {"type": "enabled"} if thinking else None
     response = await client.messages.create(
         model=model_name,
         max_tokens=config.MAX_TOKENS,
         system=system or None,
+        thinking=thinking_param,
         messages=[{"role": "user", "content": prompt}],
     )
 
