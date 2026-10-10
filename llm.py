@@ -30,8 +30,11 @@ async def chat(prompt: str, model: str = "", system: str = "", thinking: bool = 
     model_name = model or config.DEFAULT_MODEL
 
     logger.info(f"[llm] model={model_name} prompt_len={len(prompt)} thinking={thinking}")
-    # 注意:该网关不支持 thinking=disabled(报 400),所以 False 时不传该参数
-    thinking_param = {"type": "enabled"} if thinking else None
+    # glm-5.3 等模型网关强制开启 thinking(传 disabled 会 400),这类模型 False 时不传该参数
+    if thinking or model_name in config.THINKING_FORCED_MODELS:
+        thinking_param = {"type": "enabled"}
+    else:
+        thinking_param = {"type": "disabled"}
     response = await client.messages.create(
         model=model_name,
         max_tokens=config.MAX_TOKENS,

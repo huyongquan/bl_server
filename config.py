@@ -29,3 +29,6 @@ AVAILABLE_MODELS = [
 
 MAX_TOKENS = 4096
 PORT = 8003
+
+# 这些模型不支持关闭 thinking(网关强制 enable),thinking=False 时不传该参数
+THINKING_FORCED_MODELS = ["glm-5.3"]
